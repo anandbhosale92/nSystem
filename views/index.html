@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Notification system</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://localhost:3000/socket.io/socket.io.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+    function addItem(notification){
+      let isSeen = '';
+      if(notification.type == 'N') {
+        //ADDED BACKGROUND FOR NOT SEEND MESSAGES
+        isSeen = 'bg-gray';
+      }
+      //GENERATING LI ELEMENT
+      var
+        lists =  '<li class="notification-box '+isSeen+'">';
+        lists  +='<div class="row">';
+        lists  += '<div class="col-lg-3 col-sm-3 col-3 text-center">';
+        lists  +=    '<img src="user.png" class="w-50 rounded-circle">';
+        lists +=  '</div>';
+        lists +=  '<div class="col-lg-8 col-sm-8 col-8">';
+        if(isSeen !== '') {
+          lists +=    '<strong class="text-info">'+notification.notifiedBy+'</strong>';
+        }
+        else {
+          lists +=    '<span class="text-info">'+notification.notifiedBy+'</span>';
+        }
+
+        lists +=    '<div>';
+        lists +=  notification.txt;
+        lists +=  '</div>';
+        lists +=   '<small class="text-warning">'+notification.timeStamp +'</small>';
+        lists +=  '</div>';
+        lists += '</div>';
+        lists += '</li>';
+
+        $('.dropdown-menu').append(lists);
+      }
+
+      //CREATING USERID
+      function makeid() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 5; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+      }
+
+      function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }
+    $(document).ready(function(){
+      var socket = io.connect();
+
+      //CHECK FOR USERID IS PRESENT IN COOKIES OR NOT
+      //IF NOT THEN CREATE NEW USERID AND STORE
+      if(!getCookie('userId')) {
+        console.log('not found');
+        document.cookie = "userId="+makeid()+"; Path=/";
+      }
+
+      //NEW NOTIFICATION
+      socket.on('message', function(msg){
+        $('.badge').html(msg.notSeenCnt);
+        $('.dropdown-menu').empty();
+
+        for(let i = 0; i < msg.notifications.length; i++) {
+         addItem(msg.notifications[i]);
+        }
+      });
+
+      $('.bellIcon').on('click', function(){
+        var isDisplaying = $( ".dropdown-menu").hasClass( "show" );
+
+        if(!isDisplaying) {
+          console.log('fired');
+          socket.emit('onClicking', 'clicked');
+        }
+      });
+    });
+    </script>
+</head>
+<body>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 col-sm-10 col-12 offset-lg-1 offset-sm-1">
+          <nav class="navbar navbar-expand-lg bg-info rounded">
+            <a class="navbar-brand text-light" href="#">Notification System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent" style="display: unset !important;">
+              <ul class="nav nav-pills mr-auto justify-content-end">
+                <li class="nav-item dropdown">
+                  <a class="nav-link text-light bellIcon" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-bell"></i>
+                    <span class="badge">0</span>
+                  </a>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

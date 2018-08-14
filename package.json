@@ -1,0 +1,20 @@
+{
+  "name": "NSystem",
+  "version": "1.0.0",
+  "description": "Assessment App",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "Anand Bhosale",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "mongodb": "^2.2.18",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  }
+}
